@@ -11,7 +11,7 @@
             <ae-button face="round" fill="primary" class="add-token" @click="navigateAddToken">Add Token</ae-button>
         </ae-panel>
         <ae-panel>
-            <h4>Add Fungible Token</h4>
+            <h4>Deploy Fungible Token</h4>
             <hr>
             <p><small>This allows you to deploy your own fungible token contract</small></p>
             <ae-button face="round" fill="primary" class="create-token" @click="navigateCreateToken">Deploy Token Contract</ae-button>
