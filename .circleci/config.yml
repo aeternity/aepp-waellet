@@ -44,7 +44,7 @@ jobs:
         command: "TESTFILES=$(circleci tests split test_filenames.txt) "
     - run:
         name: Run Cypress tests
-        command: npx cypress run  --spec "${TESTFILES}"
+        command: npx cypress run --spec "${TESTFILES}"
 workflows:
   build:
     jobs:
