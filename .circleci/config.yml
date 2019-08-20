@@ -41,7 +41,8 @@ jobs:
         background: true
     - run:
         name: Split tests
-        command: "export TESTFILES=$(circleci tests split test_filenames.txt) "
+        command: | 
+          echo 'export TESTFILES=$(circleci tests split test_filenames.txt) ' >> $BASH_ENV
     - run:
         name: Split tests 2
         command: echo ${TESTFILES}
