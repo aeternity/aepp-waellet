@@ -44,9 +44,6 @@ jobs:
         command: | 
           echo 'export TESTFILES=$(circleci tests split test_filenames.txt) ' >> $BASH_ENV
     - run:
-        name: Split tests 2
-        command: echo ${TESTFILES//$'\n'/','}
-    - run:
         name: Run Cypress tests
         command: npx cypress run --spec "${TESTFILES//$'\n'/','}"
 workflows:
