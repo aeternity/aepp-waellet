@@ -43,10 +43,10 @@ jobs:
         name: Split tests
         command: | 
           echo 'export TESTFILES=$(circleci tests split test_filenames.txt) ' >> $BASH_ENV
-          echo "export SPECS=${TESTFILES/$'\n'/','}" >> $BASH_ENV
+          echo 'export SPECS=$(`echo "$TESTFILES" | tr \'\n\' \',\'` )' >> $BASH_ENV
     - run:
         name: Split tests 2
-        command: echo ${SPECS// /,}
+        command: echo ${SPECS}
     - run:
         name: Run Cypress tests
         command: npx cypress run --spec "${SPECS}"
