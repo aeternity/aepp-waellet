@@ -41,7 +41,7 @@ jobs:
         background: true
     - run:
         name: Split tests
-        command: "circleci tests split < ~/tests/e2e/specs/ "
+        command: "ls "
     - run:
         name: Run Cypress tests
         command: "npx cypress run  "
