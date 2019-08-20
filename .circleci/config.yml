@@ -46,10 +46,10 @@ jobs:
           echo 'export SPECS=$( echo $STR1 | sed "s/ /,/g")' >> $BASH_ENV
     - run:
         name: Split tests 2
-        command: echo ${TESTFILES// /,}
+        command: echo ${TESTFILES/$'\n'/','}
     - run:
         name: Run Cypress tests
-        command: npx cypress run --spec "${SPECS}"
+        command: npx cypress run --spec "${TESTFILES/$'\n'/','}"
 workflows:
   build:
     jobs:
