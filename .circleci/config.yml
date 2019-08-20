@@ -39,9 +39,9 @@ jobs:
         name: Start
         command: npm start
         background: true
-    -run:
+    - run:
         name: Split tests
-        command: circleci tests split < /tests/e2e/specs/
+        command: "circleci tests split < /tests/e2e/specs/ "
     - run:
         name: Run Cypress tests
         command: "npx cypress run  "
