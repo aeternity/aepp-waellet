@@ -19,12 +19,8 @@ async function generateKeyPair (passphrase, privateKey, wallet) {
   const hexStr = await Crypto.hexStringToByte(privateKey.trim())
   const keys = await Crypto.generateKeyPairFromSecret(hexStr)
   const keystore = await dump('keystore', passphrase, keys.secretKey);
-  console.log("Crypto public key")
-  console.log(keystore)
   let account = getHdWalletAccount(wallet);
   keystore.public_key = account.address;
-  console.log("Hd wallet public key")
-  console.log(keystore)
   return {
     publicKey: keystore.public_key,
     encryptedPrivateKey: JSON.stringify(keystore)
