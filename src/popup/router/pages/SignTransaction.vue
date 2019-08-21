@@ -160,12 +160,12 @@ export default {
             return (parseFloat(this.amount) + parseFloat(this.selectedFee)).toFixed(7)
         },
         insufficientBalance() {
-            if (this.data.tx.token == 'AE') {
+            // if (this.data.tx.token == 'AE') {
                 if(typeof this.data.tx.token != 'undefined') {
                     return this.tokenBalance - this.amount <= 0
                 }
                 return this.maxValue - this.amount <= 0
-            }
+            // }
         },
         inccorectAddress() {
                 if(this.data.type != 'txSign') {
@@ -391,9 +391,9 @@ export default {
                         if(this.data.popup) {
                             this.errorTx.error.message = this.alertMsg
                             this.port.postMessage(this.errorTx)
-                            // setTimeout(() => {
-                            //     window.close()
-                            // },1000)
+                            setTimeout(() => {
+                                window.close()
+                            },1000)
                         }
                     },2000)  
                 }

@@ -17,7 +17,7 @@
                         <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending"/>
                     </ae-list-item>
                 </ae-list>
-                <ae-button face="round" fill="primary" @click="seeAllRegisteredNames = false" extend>Ok</ae-button>
+                <ae-button face="round" fill="primary" class="closeAllAENS" @click="seeAllRegisteredNames = false" extend>Ok</ae-button>
             </div>
         </ae-modal-light>
         <ae-panel>
@@ -32,7 +32,7 @@
                     <ae-icon name="plus" />
                 </ae-button>
                 <small style="font-size:12px; display: inline-block;"><ae-icon style="font-size: 15px;" name="github" />{{language.pages.settings.generalSettings.registerNameRequirement}}</small>
-                <ae-button face="flat" fill="primary" @click="seeAllRegisteredNames = true">See all registered names</ae-button>
+                <ae-button face="flat" fill="primary" class="allAENS" @click="seeAllRegisteredNames = true">See all registered names</ae-button>
             </div>
         </ae-panel>
         <Loader size="big" :loading="loading" type="transparent" content="" ></Loader>

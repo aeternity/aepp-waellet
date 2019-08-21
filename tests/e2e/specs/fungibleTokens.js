@@ -330,6 +330,8 @@ describe("Test cases for adding fungible tokens functionality", () => {
         .click()
         .get('.ae-card.primary')
         .should('be.visible')
+        .get('.dropdown-holder')
+        .should('not.be.visible')
         .get('#settings')
         .click()
         .get('.dropdown-holder')

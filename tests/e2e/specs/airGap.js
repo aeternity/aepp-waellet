@@ -72,8 +72,8 @@ describe('Test cases for managing accounts and deriving multiple address from sa
         .should('contain','Link vault ')
         .click()
         .wait(3000)
-        .get('.cameraMsg p b')
-        .should('contain','Camera successfully initilized! Ready for scanning now!')
+        // .get('.cameraMsg p b')
+        // .should('contain','Camera successfully initilized! Ready for scanning now!')
     });
 
 });
