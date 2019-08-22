@@ -1,4 +1,5 @@
 import { mnemonic, tabs, transaction, transaction2, connectObj } from '../utils';
+import { stringifyForStorage, parseFromStorage } from '../../../src/popup/utils/helper'
 const onBeforeLoad = (win,mock = '') => {
     win.chrome = win.chrome || {};
     try {
@@ -18,14 +19,16 @@ const onBeforeLoad = (win,mock = '') => {
                 set(data,callback) {
                     
                     for (let d in data) {
-                        localStorage[d] = JSON.stringify(data[d]);
+                        // localStorage[d] = JSON.stringify(data[d]);
+                        localStorage[d] = stringifyForStorage(data[d]);
                     }
                     callback();
                 },
                 get(data,callback) {
                     let res = {};
                     if(localStorage.getItem(data)){
-                        res = {[data]:JSON.parse(localStorage.getItem(data))};
+                        // res = {[data]: JSON.parse(localStorage.getItem(data))};
+                        res = {[data]: parseFromStorage(localStorage.getItem(data))};
                     }
                     callback(res);
                 },
@@ -38,14 +41,14 @@ const onBeforeLoad = (win,mock = '') => {
                 set(data,callback) {
                     
                     for (let d in data) {
-                        localStorage[d] = JSON.stringify(data[d]);
+                        localStorage[d] = stringifyForStorage(data[d]);
                     }
                     callback();
                 },
                 get(data,callback) {
                     let res = {};
                     if(localStorage.getItem(data)){
-                        res = {[data]:JSON.parse(localStorage.getItem(data))};
+                        res = {[data]: parseFromStorage(localStorage.getItem(data))};
                     }
                     callback(res);
                 },

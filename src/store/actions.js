@@ -322,14 +322,21 @@ export default {
     })
   },
 
-  async unlockHdWallet({ state, dispatch, commit }, password ) {
+  async unlockHdWallet({ state, dispatch, commit }, { accountPassword, wallet } ) {
     
     return new Promise(async (resolve, reject) => {
       browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {
-        encryptedWallet = parseFromStorage(encryptedWallet)
+        if(!encryptedWallet) {
+          commit("SET_WALLET",wallet )
+          await dispatch('encryptHdWallet', accountPassword)
+          encryptedWallet = parseFromStorage(await dispatch('getEncryptedWallet'))
+        }else {
+          encryptedWallet = parseFromStorage(encryptedWallet)
+        }
+        
         commit('SET_ENCRYPTED_WALLET', encryptedWallet);
         try {
-          const passwordDerivedKey = await dispatch('deriveAndCheckPasswordKey', password);
+          const passwordDerivedKey = await dispatch('deriveAndCheckPasswordKey', accountPassword);
           const aes = new AES(passwordDerivedKey);
           
           let wallet = {
@@ -344,10 +351,15 @@ export default {
         }catch(err) {
           reject(err)
         }
-
       })
     })
-    
+  },
+  async getEncryptedWallet() {
+    return new Promise((resolve, reject) => {
+      browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {
+          resolve(encryptedWallet)
+      });
+    })
   },
   async encryptHdWallet({ commit, state: { wallet } }, password) {
     return new Promise(async (resolve, reject) => {
