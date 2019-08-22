@@ -244,6 +244,33 @@ const chekAensName = (value) => {
     return value.endsWith('.test');
 }
 
+const stringifyForStorage = state =>  {
+    return JSON.stringify(state, (key, value) => {
+        if (value instanceof ArrayBuffer) {
+          return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
+        }
+        if (value instanceof Uint8Array) {
+          return { type: 'Uint8Array', data: Array.from(value) };
+        }
+        return value;
+    })
+}
+    
+const parseFromStorage = state => {
+    return JSON.parse(
+        state,
+        (key, value) => {
+          if (value && value.type === 'ArrayBuffer') {
+            return new Uint8Array(value.data).buffer;
+          }
+          if (value && value.type === 'Uint8Array') {
+            return new Uint8Array(value.data);
+          }
+          return value;
+        },
+    );
+}
+
 export { 
     shuffleArray, 
     convertToAE, 
@@ -261,7 +288,9 @@ export {
     removeTxFromStorage,
     checkAddress,
     chekAensName,
-    isInt
+    isInt,
+    stringifyForStorage,
+    parseFromStorage
 }
 
 

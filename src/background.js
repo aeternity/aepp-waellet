@@ -10,13 +10,30 @@ chrome.browserAction.onClicked.addListener(function (tab) {
         file: 'inject.js'
 	}); 
 });
-
+function clearItem(symbol) {
+    var remove = [];
+  
+    chrome.storage.local.get(function(Items) {
+      $.each(Items, function(index, value) {
+        if (index == "symbol") remove.push(index);
+      });
+  
+      chrome.storage.local.remove(remove, function(Items) {
+        chrome.storage.local.get(function(Items) {
+          $.each(Items, function(index, value) {
+            console.log("removed: " + index);
+          });
+        });
+      });
+    });
+  };
 setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
         if(wins.length == 0) {
             sessionStorage.removeItem("phishing_urls");
             browser.storage.sync.remove('isLogged')
-            browser.storage.sync.remove('wallet')
+            // browser.storage.local.remove('wallet')
+            clearItem('wallet')
             browser.storage.sync.remove('activeAccount')
         }
     });

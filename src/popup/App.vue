@@ -317,7 +317,7 @@ export default {
     },
     logout () {
       browser.storage.sync.remove('isLogged').then(() => {
-        browser.storage.sync.remove('wallet').then(() => {
+        browser.storage.local.remove('wallet').then(() => {
           browser.storage.sync.remove('activeAccount').then(() => {
             this.dropdown.settings = false;
             this.dropdown.languages = false;

@@ -90,7 +90,7 @@ export default {
             let wallet = generateHdWallet(data);
             const keyPair = await addressGenerator.importPrivateKey(accountPassword, data, wallet);
             if(keyPair) {
-                this.setLogin(keyPair,wallet);
+                this.setLogin(keyPair,wallet, false, accountPassword);
             }
             
         },
@@ -100,7 +100,7 @@ export default {
             let wallet = generateHdWallet(privateKey);
             const keyPair = await addressGenerator.generateKeyPair(accountPassword,privateKey.toString('hex'),wallet);
             if(keyPair) {
-                this.setLogin(keyPair,wallet);
+                this.setLogin(keyPair,wallet, false, accountPassword);
             }
         },
         importKeystore:async function importKeystore({accountPassword,data}) {
@@ -111,7 +111,7 @@ export default {
             if(match !== false) {
                 let wallet = generateHdWallet(match);
                 let keyPair = {encryptedPrivateKey:JSON.stringify(encryptedPrivateKey),publicKey:encryptedPrivateKey.public_key};
-                this.setLogin(keyPair,wallet,true);
+                this.setLogin(keyPair,wallet,true, accountPassword);
             }else {
                 this.loginError = true;
                 this.errorMsg = "";
@@ -120,7 +120,7 @@ export default {
                 
             }
         },
-        setLogin(keyPair,wallet, fixAccount = false) {
+        setLogin(keyPair,wallet, fixAccount = false, accountPassword) {
             if(fixAccount) {
                 let address = getHdWalletAccount(wallet).address;
                 if(address !== keyPair.publicKey) {
@@ -131,8 +131,8 @@ export default {
                 }
             }
             browser.storage.sync.set({userAccount: keyPair}).then(() => {
-                browser.storage.sync.set({isLogged: true}).then(() => {
-                    browser.storage.sync.set({wallet: JSON.stringify(wallet)}).then(() => { 
+                browser.storage.sync.set({isLogged: true}).then(async () => {
+                    // browser.storage.sync.set({wallet: JSON.stringify(wallet)}).then(() => { 
                         let sub = [];
                         sub.push({
                             name:'Main account',
@@ -141,20 +141,21 @@ export default {
                             root:true
                         });
                         browser.storage.sync.set({subaccounts: sub}).then(() => {
-                            browser.storage.sync.set({activeAccount: 0}).then(() => {
+                            browser.storage.sync.set({activeAccount: 0}).then( () => {
                                 this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:keyPair.publicKey,index:0});
                             });
-                            this.$store.dispatch('setSubAccounts', sub).then(() => {
+                            this.$store.dispatch('setSubAccounts', sub).then(async () => {
                                 this.$store.commit('UNSET_TOKENS')
                                 this.$store.dispatch('setTokens',this.tokens)
                                 this.$store.commit('UPDATE_ACCOUNT', keyPair);
                                 this.$store.commit('SWITCH_LOGGED_IN', true);
                                 this.$store.commit('SET_WALLET', wallet);
+                                await this.$store.dispatch('encryptHdWallet', accountPassword)
                                 redirectAfterLogin(this)
                             });
                         });
                         
-                    });
+                    // });
                 });
             });
         },

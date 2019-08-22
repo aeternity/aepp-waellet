@@ -33,7 +33,27 @@ const onBeforeLoad = (win,mock = '') => {
                     localStorage.removeItem('data')
                     callback()
                 }
-            } 
+            },
+            local: {
+                set(data,callback) {
+                    
+                    for (let d in data) {
+                        localStorage[d] = JSON.stringify(data[d]);
+                    }
+                    callback();
+                },
+                get(data,callback) {
+                    let res = {};
+                    if(localStorage.getItem(data)){
+                        res = {[data]:JSON.parse(localStorage.getItem(data))};
+                    }
+                    callback(res);
+                },
+                remove(data,callback) {
+                    localStorage.removeItem('data')
+                    callback()
+                }
+            }
         };
         win.chrome.app = {
             getDetails () {

@@ -1,12 +1,13 @@
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE } from '../popup/utils/helper';
+import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
 import { FUNGIBLE_TOKEN_CONTRACT } from '../popup/utils/constants';
 import { uniqBy, head, flatten } from 'lodash-es';
 import router from '../popup/router/index'
 import Ledger from '../popup/utils/ledger/ledger';
-
+import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet'
+import AES from '../popup/utils/aes';
 
 export default {
   setAccount({ commit }, payload) {
@@ -319,6 +320,66 @@ export default {
         }, 1500)
       })
     })
+  },
+
+  async unlockHdWallet({ state, dispatch, commit }, password ) {
+    
+    return new Promise(async (resolve, reject) => {
+      browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {
+        encryptedWallet = parseFromStorage(encryptedWallet)
+        commit('SET_ENCRYPTED_WALLET', encryptedWallet);
+        try {
+          const passwordDerivedKey = await dispatch('deriveAndCheckPasswordKey', password);
+          const aes = new AES(passwordDerivedKey);
+          
+          let wallet = {
+            privateKey: new Uint8Array(await aes.decrypt(encryptedWallet.privateKey)),
+            chainCode: new Uint8Array(await aes.decrypt(encryptedWallet.chainCode)),
+          }
+          commit("SET_WALLET",wallet )
+          
+          browser.storage.local.set({ wallet: stringifyForStorage(wallet) }).then(() =>{
+            resolve()
+          });
+        }catch(err) {
+          reject(err)
+        }
+
+      })
+    })
+    
+  },
+  async encryptHdWallet({ commit, state: { wallet } }, password) {
+    return new Promise(async (resolve, reject) => {
+      const salt = genRandomBuffer(16)
+      const passwordDerivedKey = await derivePasswordKey(password, salt)
+      const aes = new AES(passwordDerivedKey); 
+      const encryptedWallet = {
+        privateKey: await aes.encrypt(wallet.privateKey),
+        chainCode: await aes.encrypt(wallet.chainCode),
+        mac: await aes.encrypt(new Uint8Array(2)),
+        salt
+      }
+
+      commit('SET_ENCRYPTED_WALLET', encryptedWallet);
+
+      browser.storage.local.set({ encryptedWallet: stringifyForStorage(encryptedWallet) }).then(() => {
+        browser.storage.local.set({ wallet: stringifyForStorage(wallet) }).then(() =>{
+          resolve()
+        })
+      });
+    })
+    
+  },
+
+  async deriveAndCheckPasswordKey({ state: { encryptedWallet } }, password) {
+    const passwordDerivedKey = await derivePasswordKey(password, encryptedWallet.salt);
+    const aes = new AES(passwordDerivedKey);
+    await aes.decrypt(encryptedWallet.privateKey);
+    await aes.decrypt(encryptedWallet.chainCode);
+    const mac = new Uint8Array(await aes.decrypt(encryptedWallet.mac));
+    if (mac.reduce((p, n) => p || n !== 0, false)) throw new Error('Wrong password');
+    return passwordDerivedKey;
   },
 
   ...Ledger
