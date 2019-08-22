@@ -94,7 +94,6 @@ import { convertToAE, currencyConv, convertAmountToCurrency, removeTxFromStorage
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, FUNGIBLE_TOKEN_CONTRACT, TX_TYPES, calculateFee } from '../../utils/constants';
 import Wallet from '@aeternity/aepp-sdk/es/ae/wallet';
 import { MemoryAccount } from '@aeternity/aepp-sdk';
-import { getHdWalletAccount } from '../../utils/hdWallet';
 import BigNumber from 'bignumber.js';
 import { clearInterval, clearTimeout  } from 'timers';
 

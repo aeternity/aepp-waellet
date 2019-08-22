@@ -52,7 +52,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { getHdWalletAccount } from '../../utils/hdWallet';
 import locales from '../../locales/locales.json';
 import { decrypt } from '../../utils/keystore';
 

@@ -33,7 +33,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { getHdWalletAccount } from '../../utils/hdWallet';
 import locales from '../../locales/locales.json';
 const {Universal} = require('@aeternity/aepp-sdk');
 import { saveAs } from 'file-saver';

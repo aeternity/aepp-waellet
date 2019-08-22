@@ -199,7 +199,6 @@ export default {
       //   this.language = locales['en'];
       //   this.current.language = 'en';
       // });
-      
       browser.storage.sync.get('activeLanguage').then((data) => {
         if (data.hasOwnProperty('activeLanguage')) {
           let defLang = locales['en'];
@@ -317,9 +316,9 @@ export default {
       }); 
     },
     logout () {
-      browser.storage.sync.set({isLogged: false}).then(() => {
-        browser.storage.sync.set({wallet: ''}).then(() => {
-          browser.storage.sync.set({activeAccount: 0}).then(() => {
+      browser.storage.sync.remove('isLogged').then(() => {
+        browser.storage.sync.remove('wallet').then(() => {
+          browser.storage.sync.remove('activeAccount').then(() => {
             this.dropdown.settings = false;
             this.dropdown.languages = false;
             this.dropdown.account = false;

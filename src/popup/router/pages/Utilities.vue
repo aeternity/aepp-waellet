@@ -21,11 +21,11 @@
                 <i class="arrowright"></i>
                 <p class="tabinfo">Add new token, or deploy token contract</p>
             </button>
-            <!-- <button class="fungible-tokens" @click="openSignVerifyMsgPage">
+            <button class="fungible-tokens" @click="openSignVerifyMsgPage">
                 <span class="settings-li">{{language.buttons.signAndVerifyMsg}}</span>
                 <i class="arrowright"></i>
                 <p class="tabinfo">Sign a message with your private key or verify a signed message</p>
-            </button> -->
+            </button>
         </ae-list>
 
         <div v-if="loading" class="loading">
@@ -43,8 +43,9 @@ import { MemoryAccount } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO } from '../../utils/constants';
 import BigNumber from 'bignumber.js';
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
-import { getHdWalletAccount, generateHdWallet } from '../../utils/hdWallet';
 import { FUNGIBLE_TOKEN_CONTRACT } from '../../utils/constants';
+import * as Crypto from '@aeternity/aepp-sdk/es/utils/crypto'
+import { addressGenerator } from '../../utils/address-generator';
 
 export default {
   data() {

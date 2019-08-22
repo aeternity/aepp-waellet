@@ -15,9 +15,12 @@ setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
         if(wins.length == 0) {
             sessionStorage.removeItem("phishing_urls");
+            browser.storage.sync.remove('isLogged')
+            browser.storage.sync.remove('wallet')
+            browser.storage.sync.remove('activeAccount')
         }
     });
-},60000);
+},5000);
 
 chrome.browserAction.setBadgeText({ 'text': 'beta' });
 chrome.browserAction.setBadgeBackgroundColor({ color: "#FF004D"});

@@ -1,6 +1,7 @@
-import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { derivePathFromKey, getKeyPair, derivePathFromSeed } from '@aeternity/hd-wallet/src/hd-key';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { generateHDWallet } from '@aeternity/hd-wallet/src';
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 
 
 export const generateHdWallet = (seed) => {
@@ -13,7 +14,6 @@ export const generateHdWallet = (seed) => {
 }
 
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
-    
     if(wallet.chainCode.constructor !== Uint8Array) {
         wallet = JSON.parse(JSON.stringify(wallet));
         wallet = {
@@ -21,9 +21,8 @@ export const getHdWalletAccount = (wallet, accountIdx = 0) => {
             privateKey:new Uint8Array(new Uint8Array(Object.values(wallet.privateKey)))
         }
     }
-    
     const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
-
+    
     return {
         ...keyPair,
         idx:accountIdx,
