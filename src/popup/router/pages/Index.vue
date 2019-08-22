@@ -384,7 +384,6 @@ export default {
               this.loginError = false;
               this.inputError = {};
               let wallet = generateHdWallet(match);
-              console.log(wallet)
               let unlock = await this.$store.dispatch('unlockHdWallet', { accountPassword, wallet })
               
               let address = getHdWalletAccount(this.wallet).address;

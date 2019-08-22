@@ -33,7 +33,7 @@ const onBeforeLoad = (win,mock = '') => {
                     callback(res);
                 },
                 remove(data,callback) {
-                    localStorage.removeItem('data')
+                    localStorage.removeItem(data)
                     callback()
                 }
             },
@@ -53,7 +53,7 @@ const onBeforeLoad = (win,mock = '') => {
                     callback(res);
                 },
                 remove(data,callback) {
-                    localStorage.removeItem('data')
+                    localStorage.removeItem(data)
                     callback()
                 }
             }
