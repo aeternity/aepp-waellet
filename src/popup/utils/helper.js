@@ -1,6 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { getHdWalletAccount } from './hdWallet';
 import { Crypto } from '@aeternity/aepp-sdk/es';
+import { postMesssage } from './connection';
 
 const shuffleArray = (array) => {
     let currentIndex = array.length, temporaryValue, randomIndex;
@@ -152,38 +153,40 @@ const redirectAfterLogin = (ctx) => {
 }
 
 
-const initializeSDK = (ctx, { network, current, account, wallet, activeAccount = 0 },background = false) => {
-    if(!background) {
+const initializeSDK = (ctx, { network, current, account, wallet, activeAccount = 0, background },backgr = false) => {
+    if(!backgr) {
         ctx.hideConnectError()
     }
     return new Promise ((resolve,reject) => {
-        Universal({
-            url: (typeof network != 'undefined' ? network[current.network].url : "https://sdk-testnet.aepps.com" ) , 
-            internalUrl:(typeof network != 'undefined' ? network[current.network].internalUrl : "https://sdk-testnet.aepps.com" ),
-            keypair: {
-                publicKey: account.publicKey,
-                secretKey: getHdWalletAccount(wallet,activeAccount).secretKey
-            },
-            networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ), 
-            nativeMode: true,
-            compilerUrl: 'https://compiler.aepps.com'
-        }).then((sdk) => {
-            if(!background) {
-                ctx.$store.dispatch('initSdk',sdk).then(() => {
+        postMesssage(background, { type: 'getKeypair' , payload: {  activeAccount, account } } ).then(({ res }) => {
+            res = parseFromStorage(res)
+            Universal({
+                url: (typeof network != 'undefined' ? network[current.network].url : "https://sdk-testnet.aepps.com" ) , 
+                internalUrl:(typeof network != 'undefined' ? network[current.network].internalUrl : "https://sdk-testnet.aepps.com" ),
+                keypair:{ ...res },
+                networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ), 
+                nativeMode: true,
+                compilerUrl: 'https://compiler.aepps.com'
+            }).then((sdk) => {
+                if(!backgr) {
+                    ctx.$store.dispatch('initSdk',sdk).then(() => {
+                        ctx.hideLoader()
+                    })
+                }else {
+                    resolve(sdk)
+                }
+            })
+            .catch(err => {
+                if(!backgr) {
                     ctx.hideLoader()
-                })
-            }else {
-                resolve(sdk)
-            }
+                    ctx.showConnectError()
+                }
+            })
         })
-        .catch(err => {
-            if(!background) {
-                ctx.hideLoader()
-                ctx.showConnectError()
-            }
-        })
+        
     })
 }
+
 
 const  currencyConv = async (ctx) => {
     browser.storage.sync.get('convertTimer').then(async result => {
@@ -266,6 +269,10 @@ const parseFromStorage = state => {
           if (value && value.type === 'Uint8Array') {
             return new Uint8Array(value.data);
           }
+          if(value && value.type == 'Buffer' ) {
+            return new Uint8Array(value.data);
+          }
+          
           return value;
         },
     );

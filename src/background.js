@@ -1,5 +1,7 @@
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { checkAeppConnected, initializeSDK, removeTxFromStorage } from './popup/utils/helper';
+import WalletContorller from './wallet-controller'
+
 
 global.browser = require('webextension-polyfill');
 
@@ -10,30 +12,13 @@ chrome.browserAction.onClicked.addListener(function (tab) {
         file: 'inject.js'
 	}); 
 });
-function clearItem(symbol) {
-    var remove = [];
-  
-    chrome.storage.local.get(function(Items) {
-      $.each(Items, function(index, value) {
-        if (index == "symbol") remove.push(index);
-      });
-  
-      chrome.storage.local.remove(remove, function(Items) {
-        chrome.storage.local.get(function(Items) {
-          $.each(Items, function(index, value) {
-            console.log("removed: " + index);
-          });
-        });
-      });
-    });
-  };
+
 setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
         if(wins.length == 0) {
             sessionStorage.removeItem("phishing_urls");
             browser.storage.sync.remove('isLogged')
             // browser.storage.local.remove('wallet')
-            clearItem('wallet')
             browser.storage.sync.remove('activeAccount')
         }
     });
@@ -326,3 +311,15 @@ const postToContent = (data, tabId) => {
     const message = { method: 'aeppMessage', data };
     browser.tabs.sendMessage(tabId, message)
 }
+
+const controller = new WalletContorller()
+
+browser.runtime.onConnect.addListener( ( port ) => {
+    if(port.name == 'popup' && port.sender.id == browser.runtime.id && port.sender.url == `chrome-extension://${browser.runtime.id}/popup/popup.html`) {
+        port.onMessage.addListener(({ type, payload, uuid}) => {
+            controller[type](payload).then((res) => {
+                port.postMessage({ uuid, res })
+            })
+        })  
+    }
+})  

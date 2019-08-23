@@ -158,9 +158,11 @@ export default {
                         browser.storage.sync.get('accountPassword').then(async pass => {
                             if(pass.hasOwnProperty('accountPassword') && pass.accountPassword != "") {
                                 originalSeed = originalSeed.replace(/,/g, ' ');
-                                let privateKey = mnemonicToSeed(originalSeed);
-                                let wallet = generateHdWallet(privateKey);
-                                const keyPair = await addressGenerator.generateKeyPair(pass.accountPassword,privateKey.toString('hex'), wallet);
+                                let seed = mnemonicToSeed(originalSeed);
+                                console.log(seed)
+                                let address = await this.$store.dispatch('generateWallet', { seed })
+                                // let wallet = generateHdWallet(privateKey);
+                                const keyPair = await addressGenerator.generateKeyPair(pass.accountPassword,seed.toString('hex'), address);
                                 if(keyPair) {
                                     browser.storage.sync.set({isLogged: true}).then(async () => {
                                         browser.storage.sync.set({userAccount: keyPair}).then(() => {
@@ -182,8 +184,8 @@ export default {
                                                     this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:keyPair.publicKey,index:0});
                                                     this.$store.commit('UPDATE_ACCOUNT', keyPair);
                                                     this.$store.commit('SWITCH_LOGGED_IN', true);
-                                                    this.$store.commit('SET_WALLET', wallet);
-                                                    await this.$store.dispatch('encryptHdWallet', pass.accountPassword)
+                                                    // this.$store.commit('SET_WALLET', wallet);
+                                                    // await this.$store.dispatch('encryptHdWallet', pass.accountPassword)
                                                     this.$router.push('/account');
                                                     this.generated = true;
                                                 });

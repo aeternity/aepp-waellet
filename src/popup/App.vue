@@ -163,6 +163,7 @@ import { saveAs } from 'file-saver';
 import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK } from './utils/helper';
 import LedgerBridge from './utils/ledger/ledger-bridge'
+import { start, postMesssage } from './utils/connection'
 
 export default {
   
@@ -188,17 +189,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters (['account', 'current', 'network', 'userNetworks', 'popup', 'isLoggedIn', 'AeAPI', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'wallet', 'sdk','tokens','aeppPopup','ledgerNextIdx']),
+    ...mapGetters (['account', 'current', 'network', 'userNetworks', 'popup', 'isLoggedIn', 'AeAPI', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk','tokens','aeppPopup','ledgerNextIdx']),
     extensionVersion() {
       return 'v.' + browser.runtime.getManifest().version + 'beta'
     }
   },
-  created: function () {
-      // browser.storage.sync.set({language: 'en'}).then(() => {
-      //   browser.storage.sync.set({activeLanguage: 'en'});
-      //   this.language = locales['en'];
-      //   this.current.language = 'en';
-      // });
+  created: async function () {
       browser.storage.sync.get('activeLanguage').then((data) => {
         if (data.hasOwnProperty('activeLanguage')) {
           let defLang = locales['en'];
@@ -211,12 +207,16 @@ export default {
           this.$store.state.current.network = data.activeNetwork;
         }
       });
-
+      let background = await start(browser)
+      this.$store.commit( 'SET_BACKGROUND', background )
+      // console.log(this.$store.state.background)
       //init SDK
       this.checkSDKReady = setInterval(() => {
         if(this.isLoggedIn && this.sdk == null) {
+         
           this.initLedger()
           this.initSDK()
+          
           this.pollData()
           clearInterval(this.checkSDKReady)
         }
@@ -241,10 +241,6 @@ export default {
           this.mobileRight = "default"
         }
       });
-      // let states = this.$store.state;
-      // if (typeof states.aeAPI == 'undefined') {
-      //   this.$store.state.aeAPI = this.fetchApi();
-      // }
   },
   mounted: function mounted () {
     this.dropdown.settings = false;
@@ -428,7 +424,7 @@ export default {
       return ae;
     },
     initSDK() {
-        initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount })
+        initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
     },
     toTokens() {
       this.dropdown.settings = false

@@ -65,6 +65,7 @@ import store from '../../../store';
 import locales from '../../locales/locales.json'
 import { mapGetters } from 'vuex';
 import { getHdWalletAccount } from '../../utils/hdWallet';
+import { postMesssage } from '../../utils/connection';
 export default {
     data () {
         return {
@@ -81,7 +82,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters (['account', 'current', 'network','subaccounts','wallet', 'popup'])
+        ...mapGetters (['account', 'current', 'network','subaccounts','wallet', 'popup', 'background'])
     },
     created(){
         this.setAccounts();
@@ -127,13 +128,14 @@ export default {
             this.dropdown = false;
             this.аddNewSubbAcc = false;
         },
-        addbtn() {
+        async addbtn() {
             if (this.newSubAcc != '') {
                 let idx = this.subaccounts.filter(s => !s.isLedger && !s.isAirGapAcc).length
-                let public_K = getHdWalletAccount(this.wallet, idx).address;
+                // let public_K = getHdWalletAccount(this.wallet, idx).address;
+                let address = await this.$store.dispatch('getAccount', { idx })
                 this.$store.dispatch('setSubAccount', {
                     name: this.newSubAcc,
-                    publicKey: public_K,
+                    publicKey: address,
                     root:false,
                     balance:0
                 }).then(() => {
@@ -144,7 +146,7 @@ export default {
                         }).then(() => {
                             let index =  this.subaccounts.length - 1;
                             browser.storage.sync.set({activeAccount: index }).then(() => {
-                                this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:public_K,index:index});
+                                this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:address,index:index});
                             });
                             this.setAccounts();
                         });

@@ -105,5 +105,8 @@ export default {
   },
   [types.SET_ENCRYPTED_WALLET] (state, payload) {
     state.encryptedWallet = payload
+  },
+  [types.SET_BACKGROUND] (state, payload) {
+    state.background = payload
   }
 }; 

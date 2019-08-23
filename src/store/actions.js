@@ -8,6 +8,7 @@ import router from '../popup/router/index'
 import Ledger from '../popup/utils/ledger/ledger';
 import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet'
 import AES from '../popup/utils/aes';
+import { postMesssage } from '../popup/utils/connection';
 
 export default {
   setAccount({ commit }, payload) {
@@ -354,6 +355,29 @@ export default {
       })
     })
   },
+
+  async unlockWallet({ state: { background }, dispatch, commit }, payload ) {
+    return new Promise(async (resolve, reject) => {
+      let msg = await postMesssage(background,  { type: 'unlockWallet' , payload })
+      resolve(msg.res)
+    })
+  },
+
+  async getAccount({ state: { background } }, { idx } ) {
+    return new Promise(async (resolve, reject) => {
+      let { res: { address } } = await postMesssage(background, { type: 'getAccount' , payload: { idx } } )
+      resolve(address)
+    })
+  },
+
+  async generateWallet({ state: { background } }, { seed } ) {
+    return new Promise(async (resolve, reject) => {
+    console.log(seed)
+      let { res: { address } } = await postMesssage(background, { type: 'generateWallet' , payload: { seed:stringifyForStorage(seed) } } )
+      resolve(address)
+    })
+  },
+
   async getEncryptedWallet() {
     return new Promise((resolve, reject) => {
       browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {

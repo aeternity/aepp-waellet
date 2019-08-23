@@ -87,20 +87,22 @@ export default {
         },
         importPrivateKey: async function importPrivateKey({accountPassword,data}) {
             this.loading = true;
-            let wallet = generateHdWallet(data);
-            const keyPair = await addressGenerator.importPrivateKey(accountPassword, data, wallet);
+            // let wallet = generateHdWallet(data);
+            let address = await this.$store.dispatch('generateWallet', { seed: data })
+            const keyPair = await addressGenerator.importPrivateKey(accountPassword, data, address);
             if(keyPair) {
-                this.setLogin(keyPair,wallet, false, accountPassword);
+                this.setLogin(keyPair, false, accountPassword);
             }
             
         },
         importSeedPhrase: async function importSeedPhrase({accountPassword,data}) {
             this.loading = true;
-            let privateKey = mnemonicToSeed(data)
-            let wallet = generateHdWallet(privateKey);
-            const keyPair = await addressGenerator.generateKeyPair(accountPassword,privateKey.toString('hex'),wallet);
+            let seed = mnemonicToSeed(data)
+            // let wallet = generateHdWallet(privateKey);
+            let address = await this.$store.dispatch('generateWallet', { seed })
+            const keyPair = await addressGenerator.generateKeyPair(accountPassword,seed.toString('hex'),address);
             if(keyPair) {
-                this.setLogin(keyPair,wallet, false, accountPassword);
+                this.setLogin(keyPair, false, accountPassword);
             }
         },
         importKeystore:async function importKeystore({accountPassword,data}) {
@@ -109,9 +111,9 @@ export default {
             let match = await decrypt(encryptedPrivateKey.crypto.ciphertext,accountPassword,encryptedPrivateKey.crypto.cipher_params.nonce,encryptedPrivateKey.crypto.kdf_params.salt);
             
             if(match !== false) {
-                let wallet = generateHdWallet(match);
+                // let wallet = generateHdWallet(match);
                 let keyPair = {encryptedPrivateKey:JSON.stringify(encryptedPrivateKey),publicKey:encryptedPrivateKey.public_key};
-                this.setLogin(keyPair,wallet,true, accountPassword);
+                this.setLogin(keyPair,true, accountPassword);
             }else {
                 this.loginError = true;
                 this.errorMsg = "";
@@ -120,9 +122,10 @@ export default {
                 
             }
         },
-        setLogin(keyPair,wallet, fixAccount = false, accountPassword) {
+        async setLogin(keyPair, fixAccount = false, accountPassword) {
             if(fixAccount) {
-                let address = getHdWalletAccount(wallet).address;
+                // let address = getHdWalletAccount(wallet).address;
+                let address = await this.$store.dispatch('getAccount', { idx:0 })
                 if(address !== keyPair.publicKey) {
                     keyPair.publicKey = address;
                     let encPrivateKey = JSON.parse(keyPair.encryptedPrivateKey);
@@ -149,8 +152,8 @@ export default {
                                 this.$store.dispatch('setTokens',this.tokens)
                                 this.$store.commit('UPDATE_ACCOUNT', keyPair);
                                 this.$store.commit('SWITCH_LOGGED_IN', true);
-                                this.$store.commit('SET_WALLET', wallet);
-                                await this.$store.dispatch('encryptHdWallet', accountPassword)
+                                // this.$store.commit('SET_WALLET', wallet);
+                                // await this.$store.dispatch('encryptHdWallet', accountPassword)
                                 redirectAfterLogin(this)
                             });
                         });

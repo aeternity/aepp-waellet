@@ -1,8 +1,11 @@
 import { mnemonic, tabs, transaction, transaction2, connectObj } from '../utils';
 import { stringifyForStorage, parseFromStorage } from '../../../src/popup/utils/helper'
+import WalletController from '../../../src/wallet-controller'
 const onBeforeLoad = (win,mock = '') => {
     win.chrome = win.chrome || {};
     try {
+        let event = new CustomEvent("background"); 
+        const controller = new WalletController(true);
         win.chrome.runtime = {
             getURL(url){
                 let path = url.split("/").filter(u => u != "..").join("/");
@@ -12,8 +15,36 @@ const onBeforeLoad = (win,mock = '') => {
                 return {
                     version:"0.0.4"
                 }
+            },
+            connect() {
+                return {
+                    postMessage:function(msg){
+                        event = new CustomEvent("background", { detail: msg });
+                        setTimeout(() => {
+                            window.dispatchEvent(event)
+                        },2000)
+                        
+                    },
+                    onMessage:{
+                        addListener(cb) {
+                            window.addEventListener("background", ({ detail }) => {
+                                if(typeof detail.type != 'undefined') {
+                                    controller[detail.type](detail.payload).then(res => {
+                                        cb({res, uuid:detail.uuid})
+                                    })
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            onConnect:{
+                addListener(cb) {
+                    cb(win.chrome.runtime.connect())
+                }   
             }
         };
+
         win.chrome.storage = {
             sync: {
                 set(data,callback) {
