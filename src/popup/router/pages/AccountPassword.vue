@@ -4,26 +4,28 @@
             <div class="popup">
                 <div v-if="!loading">
                     <h3>{{title}}</h3>
+                    <ae-button @click="navigateToIndex" class="closeBtn">
+                        <ae-icon name="close" />
+                    </ae-button>
                     <password v-if="confirmPassword" v-model="accountPassword" strength-meter-class="passwordStrengthMeter" :strength-meter-only="true" @score="getScore"/>
                     <ae-input  placeholder="" class="my-2" label="Password" v-bind="inputError">
                         <input type="password" class="ae-input" :min="minPasswordLength"  v-model="accountPassword" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
-                        <ae-toolbar v-if="errorMsg == 'length'" slot="footer">Password must be at lest {{ minPasswordLength }} symbols! </ae-toolbar>
-                        <ae-toolbar v-if="errorMsg == 'weak'" slot="footer">Too weak password!</ae-toolbar>
-                        <ae-toolbar v-if="loginError" slot="footer">Incorrect password !</ae-toolbar>
+                        <ae-toolbar v-if="errorMsg == 'length'" slot="footer">{{ $t('pages.accountPassword.passwordSymbolsError') }}{{ minPasswordLength }}</ae-toolbar>
+                        <ae-toolbar v-if="errorMsg == 'weak'" slot="footer">{{ $t('pages.accountPassword.weakPasswordError') }}</ae-toolbar>
+                        <ae-toolbar v-if="loginError" slot="footer">{{ $t('pages.accountPassword.incorrectPasswordError') }}</ae-toolbar>
                     </ae-input>
                     <ae-input  v-if="confirmPassword" placeholder="" class="my-2" label="Repeat Password" v-bind="inputError">
                         <input type="password" class="ae-input" :min="minPasswordLength" v-model="confirmAccountPassword" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
-                        <ae-toolbar v-if="errorMsg == 'match'" slot="footer">Passwords doesn't match! </ae-toolbar>
+                        <ae-toolbar v-if="errorMsg == 'match'" slot="footer">{{ $t('pages.accountPassword.passwordDoesntMatchError') }} </ae-toolbar>
                     </ae-input>
-                    <ae-button face="round" extend fill="primary" @click="clickAction({accountPassword,data,confirmAccountPassword})">{{buttonTitle}}</ae-button>
+                    <ae-button face="round" extend fill="primary" @click="clickAction({accountPassword,data,confirmAccountPassword, termsAgreed})">{{buttonTitle}}</ae-button>
                 </div>
-                <Loader size="small" :loading="loading" v-bind="{'content':language.strings.securingAccount}"></Loader>
+                <Loader size="small" :loading="loading" v-bind="{'content':$t('pages.accountPassword.securingAccount')}"></Loader>
             </div>
         </main>
     </div> 
 </template>
 <script>
-import locales from '../../locales/locales.json';
 import { addressGenerator } from '../../utils/address-generator';
 import { decrypt } from '../../utils/keystore';
 import { mnemonicToSeed } from '@aeternity/bip39';
@@ -34,11 +36,10 @@ import { mapGetters } from 'vuex'
 import { redirectAfterLogin } from '../../utils/helper';
 
 export default {
-    props: ['data','confirmPassword','buttonTitle','type','title'],
+    props: ['data','confirmPassword','buttonTitle','type','title', 'termsAgreed'],
     components: { Password },
     data() {
         return {
-            language: locales['en'],
             accountPassword:'',
             confirmAccountPassword:'',
             inputError:{},
@@ -52,12 +53,14 @@ export default {
     computed: {
         ...mapGetters(['tokens'])
     },
-    locales,
     methods: {
+        navigateToIndex() {
+            this.$router.push('/');
+        },
         getScore(score) {
             this.passwordScore = score;
         },
-        clickAction({accountPassword,data,confirmAccountPassword}) {
+        clickAction({accountPassword,data,confirmAccountPassword, termsAgreed}) {
             if((this.confirmPassword && accountPassword !== confirmAccountPassword) || accountPassword.length < this.minPasswordLength || (this.confirmPassword && confirmAccountPassword < this.minPasswordLength))  {
                 this.inputError = {error:""};
                 if(accountPassword.length < this.minPasswordLength || (this.confirmPassword && confirmAccountPassword < this.minPasswordLength)){
@@ -73,39 +76,39 @@ export default {
             }
             this.inputError = {};
             if(this.type == 'privateKey') {
-                this.importPrivateKey({accountPassword,data});
+                this.importPrivateKey({accountPassword,data, termsAgreed});
             }else if(this.type == 'seedPhrase') {
-                this.importSeedPhrase({accountPassword,data});
+                this.importSeedPhrase({accountPassword,data, termsAgreed});
             }else if(this.type == 'keystore') {
-                this.importKeystore({accountPassword,data});
+                this.importKeystore({accountPassword,data, termsAgreed});
             }else if(this.type == 'generateEncrypt') {
-                this.generateAddress({accountPassword});
+                this.generateAddress({accountPassword,termsAgreed});
             }else if(this.type == 'login') {
                 this.login({accountPassword});
             }
             // this.$emit('clickAction',{accountPassword,data});
         },
-        importPrivateKey: async function importPrivateKey({accountPassword,data}) {
+        importPrivateKey: async function importPrivateKey({accountPassword,data,termsAgreed}) {
             this.loading = true;
             // let wallet = generateHdWallet(data);
             let address = await this.$store.dispatch('generateWallet', { seed: data })
             const keyPair = await addressGenerator.importPrivateKey(accountPassword, data, address);
             if(keyPair) {
-                this.setLogin(keyPair, false, accountPassword);
+                this.setLogin(keyPair,wallet, false, termsAgreed, accountPassword);
             }
             
         },
-        importSeedPhrase: async function importSeedPhrase({accountPassword,data}) {
+        importSeedPhrase: async function importSeedPhrase({accountPassword,data,termsAgreed}) {
             this.loading = true;
             let seed = mnemonicToSeed(data)
             // let wallet = generateHdWallet(privateKey);
             let address = await this.$store.dispatch('generateWallet', { seed })
             const keyPair = await addressGenerator.generateKeyPair(accountPassword,seed.toString('hex'),address);
             if(keyPair) {
-                this.setLogin(keyPair, false, accountPassword);
+                this.setLogin(keyPair,wallet, false, termsAgreed, accountPassword);
             }
         },
-        importKeystore:async function importKeystore({accountPassword,data}) {
+        importKeystore:async function importKeystore({accountPassword,data,termsAgreed}) {
             this.loading = true;
             const encryptedPrivateKey = JSON.parse(data);
             let seed = await decrypt(encryptedPrivateKey.crypto.ciphertext,accountPassword,encryptedPrivateKey.crypto.cipher_params.nonce,encryptedPrivateKey.crypto.kdf_params.salt);
@@ -114,7 +117,7 @@ export default {
                 let address = await this.$store.dispatch('generateWallet', { seed })
                 // let wallet = generateHdWallet(match);
                 let keyPair = {encryptedPrivateKey:JSON.stringify(encryptedPrivateKey),publicKey:encryptedPrivateKey.public_key};
-                this.setLogin(keyPair,true, accountPassword);
+                this.setLogin(keyPair,wallet,true,termsAgreed, accountPassword);
             }else {
                 this.loginError = true;
                 this.errorMsg = "";
@@ -123,7 +126,7 @@ export default {
                 
             }
         },
-        async setLogin(keyPair, fixAccount = false, accountPassword) {
+        async setLogin(keyPair,wallet, fixAccount = false, termsAgreed, accountPassword) {
             if(fixAccount) {
                 // let address = getHdWalletAccount(wallet).address;
                 let address = await this.$store.dispatch('getAccount', { idx:0 })
@@ -136,7 +139,7 @@ export default {
             }
             browser.storage.sync.set({userAccount: keyPair}).then(() => {
                 browser.storage.sync.set({isLogged: true}).then(async () => {
-                    // browser.storage.sync.set({wallet: JSON.stringify(wallet)}).then(() => { 
+                    browser.storage.sync.set({ termsAgreed: termsAgreed }).then(() => {
                         let sub = [];
                         sub.push({
                             name:'Main account',
@@ -159,20 +162,32 @@ export default {
                             });
                         });
                         
-                    // });
+                    });
                 });
             });
         },
-        generateAddress: async function generateAddress({ accountPassword }) {
+        generateAddress: async function generateAddress({ accountPassword, termsAgreed}) {
             this.loading = true;
             browser.storage.sync.set({accountPassword: accountPassword}).then(() => {
-                 this.$router.push('/seed');
+                this.$router.push({
+                    name: 'seed',
+                    params: {
+                        termsAgreed: termsAgreed
+                    },
+                });
             });
-        },
+        }
     }
 }
 
 </script>
 <style lang="scss" scoped>
 @import '../../../common/base';
+.closeBtn {
+    position: absolute !important;
+    top: 17px;
+    right: 16px;
+    font-size: 18px;
+    color: #000;
+}
 </style>
