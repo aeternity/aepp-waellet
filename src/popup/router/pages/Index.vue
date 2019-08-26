@@ -449,14 +449,6 @@ export default {
         context.loading = false;
       }
     },
-    // termsAgreedCheckbox() {
-    //   if (this.terms[0] == 1) {
-    //     this.agreed = true;
-    //   }
-    //   else {
-    //     this.agreed = false;
-    //   }
-    // }
   },
 };
 </script>

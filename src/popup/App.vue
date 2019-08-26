@@ -490,9 +490,6 @@ export default {
   html { scrollbar-width: none; }
   .actions .backbutton .ae-icon { vertical-align: middle !important; }
 }
-// ::-webkit-scrollbar { 
-//     display: none; 
-// }
 @-moz-document url-prefix() {
   .ae-main { width: 380px; margin:0 auto; }
 }
@@ -505,7 +502,6 @@ input { background: transparent; border: none; border-bottom: 1px; height: 25px;
 input:focus { border-bottom: 1px solid #DDD; }
 button:focus { outline: none; }
 button { background: none; border: none; color: #717C87; cursor: pointer; transition: all 0.2s; }
-// .ae-button + .ae-button { margin-top: 1rem; }
 .pageTitle { margin: 0 0 10px; }
 .ae-header { border-bottom: 1px solid #EEE; margin-bottom: 10px; }
 .ae-header.logged { background: #001833; }
@@ -526,7 +522,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountInfo { margin-right:auto; margin-bottom:0 !important; max-width: 155px; }
 #network .subAccountInfo { max-width: 195px; }
 .subAccountIcon { margin-right: 10px; }
-.subAccountName { /*width: 110px; line-height: 28px;*/text-align: left; color: #000; text-overflow: ellipsis; overflow: hidden; font-weight:bold; margin-bottom:0 !important; white-space: nowrap; }
+.subAccountName { text-align: left; color: #000; text-overflow: ellipsis; overflow: hidden; font-weight:bold; margin-bottom:0 !important; white-space: nowrap; }
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
 #account .subAccountCheckbox { float: right; }

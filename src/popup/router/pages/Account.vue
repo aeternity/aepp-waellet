@@ -92,9 +92,6 @@ export default {
         this.loading = true;
         this.updateTransactions();
       },
-      watchBalance() {
-        // this.updateTransactions();
-      },
       watchToken() {
         this.updateTransactions();
       }

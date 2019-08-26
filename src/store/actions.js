@@ -311,8 +311,6 @@ export default {
             type: tx.type
           }
         })
-
-        // return register
       } else {
         resolve()
       }
