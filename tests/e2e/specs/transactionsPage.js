@@ -58,7 +58,7 @@ describe("Tets cases for Transactions Page", () => {
             let fee = data.tx.fee / 10 ** 18;
             let total = (parseFloat(amount) + parseFloat(fee)).toFixed(7);
             cy.get('.allTransactions .list-item-transaction').eq(0).click().then(elem => {
-                if (data.tx.type != "NameClaimTx" && data.tx.type != 'NamePreclaimTx' && data.tx.type != 'NameUpdateTx' && data.tx.type != 'ContractCreateTx'){
+                if (data.tx.type != "NameClaimTx" && data.tx.type != 'NamePreclaimTx' && data.tx.type != 'NameUpdateTx' && data.tx.type != 'ContractCreateTx' && data.tx.type != 'ContractCallTx'){
                     cy.get('body').find('.transactionDate').should('contain',new Date(data.time).toLocaleTimeString() );
                     cy.get('body').find('.transactionAmount').should('contain',amount);
                     cy.get('body').find('.transactionFee').should('contain',fee);

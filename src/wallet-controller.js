@@ -9,7 +9,15 @@ export default class WalletController {
         if(tests && localStorage.getItem('wallet')) {
             this.wallet = parseFromStorage(localStorage.getItem('wallet'))
         }
-        
+        if(!tests) {
+            setInterval(() => {
+                browser.windows.getAll({}).then((wins) => {
+                    if(wins.length == 0) {
+                        this.wallet = null
+                    }
+                });
+            },5000);
+        }
     }
 
     unlockWallet({ accountPassword, encryptedPrivateKey }) {

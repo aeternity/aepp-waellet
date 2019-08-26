@@ -157,34 +157,48 @@ const initializeSDK = (ctx, { network, current, account, wallet, activeAccount =
     if(!backgr) {
         ctx.hideConnectError()
     }
-    return new Promise ((resolve,reject) => {
-        postMesssage(background, { type: 'getKeypair' , payload: {  activeAccount, account } } ).then(({ res }) => {
-            res = parseFromStorage(res)
-            Universal({
-                url: (typeof network != 'undefined' ? network[current.network].url : "https://sdk-testnet.aepps.com" ) , 
-                internalUrl:(typeof network != 'undefined' ? network[current.network].internalUrl : "https://sdk-testnet.aepps.com" ),
-                keypair:{ ...res },
-                networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ), 
-                nativeMode: true,
-                compilerUrl: 'https://compiler.aepps.com'
-            }).then((sdk) => {
-                if(!backgr) {
-                    ctx.$store.dispatch('initSdk',sdk).then(() => {
-                        ctx.hideLoader()
-                    })
-                }else {
-                    resolve(sdk)
-                }
+    return new Promise (async (resolve,reject) => {
+        if(!backgr) {
+            postMesssage(background, { type: 'getKeypair' , payload: {  activeAccount, account } } ).then(async ({ res }) => {
+                res = parseFromStorage(res)
+                let sdk = await createSDKObject(ctx, { network, current, account, wallet, activeAccount, background, res },backgr)
+                resolve(sdk)
             })
-            .catch(err => {
-                if(!backgr) {
-                    ctx.hideLoader()
-                    ctx.showConnectError()
-                }
-            })
-        })
+        }else {
+            let sdk = await createSDKObject(ctx, { network, current, account, activeAccount, background, res: account },backgr)
+            resolve(sdk)
+        }
+        
         
     })
+}
+
+const createSDKObject = (ctx, { network, current, account, wallet, activeAccount = 0, background, res }, backgr ) => {
+    return new Promise((resolve, reject) => {
+        Universal({
+            url: (typeof network != 'undefined' ? network[current.network].url : "https://sdk-testnet.aepps.com" ) , 
+            internalUrl:(typeof network != 'undefined' ? network[current.network].internalUrl : "https://sdk-testnet.aepps.com" ),
+            keypair:{ ...res },
+            networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ), 
+            nativeMode: true,
+            compilerUrl: 'https://compiler.aepps.com'
+        }).then((sdk) => {
+            if(!backgr) {
+                ctx.$store.dispatch('initSdk',sdk).then(() => {
+                    ctx.hideLoader()
+                })
+            }
+            resolve(sdk)
+        })
+        .catch(err => {
+            if(!backgr) {
+                ctx.hideLoader()
+                ctx.showConnectError()
+            }
+            resolve()
+        })
+    })
+    
 }
 
 

@@ -173,7 +173,7 @@ export const importSeed  = () => {
   .invoke('attr', 'title')
   .should('eq',hdWallet(mnemonicToSeed(mnemonic)));
 }
-
+ 
 export const importKeystore = () => {
   cy
   .visit('popup/popup.html',{onBeforeLoad})

@@ -22,7 +22,7 @@ const onBeforeLoad = (win,mock = '') => {
                         event = new CustomEvent("background", { detail: msg });
                         setTimeout(() => {
                             window.dispatchEvent(event)
-                        },2000)
+                        },1000)
                         
                     },
                     onMessage:{

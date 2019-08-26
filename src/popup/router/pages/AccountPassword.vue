@@ -108,9 +108,10 @@ export default {
         importKeystore:async function importKeystore({accountPassword,data}) {
             this.loading = true;
             const encryptedPrivateKey = JSON.parse(data);
-            let match = await decrypt(encryptedPrivateKey.crypto.ciphertext,accountPassword,encryptedPrivateKey.crypto.cipher_params.nonce,encryptedPrivateKey.crypto.kdf_params.salt);
+            let seed = await decrypt(encryptedPrivateKey.crypto.ciphertext,accountPassword,encryptedPrivateKey.crypto.cipher_params.nonce,encryptedPrivateKey.crypto.kdf_params.salt);
             
-            if(match !== false) {
+            if(seed !== false) {
+                let address = await this.$store.dispatch('generateWallet', { seed })
                 // let wallet = generateHdWallet(match);
                 let keyPair = {encryptedPrivateKey:JSON.stringify(encryptedPrivateKey),publicKey:encryptedPrivateKey.public_key};
                 this.setLogin(keyPair,true, accountPassword);

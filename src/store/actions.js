@@ -372,7 +372,6 @@ export default {
 
   async generateWallet({ state: { background } }, { seed } ) {
     return new Promise(async (resolve, reject) => {
-    console.log(seed)
       let { res: { address } } = await postMesssage(background, { type: 'generateWallet' , payload: { seed:stringifyForStorage(seed) } } )
       resolve(address)
     })
