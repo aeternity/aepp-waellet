@@ -40,7 +40,7 @@
                 <input disabled :value="txAccount" length="flat" class="transactionTo transactionDetailsInputs"/>
             </ae-list-item>
             <ae-list-item fill="neutral" class="flex-direction-column"  v-if="isContractCallTx">
-                <div class="flex-col text-left mb-1 detailTitle">{{language.pages.transactionDetails.contractId}} <button :class="transactionType.fill" v-clipboard:copy="transaction.tx.contract_id" @click="copy" class="copyBtn">COPY</button></div>
+                <div class="flex-col text-left mb-1 detailTitle">{{$t('pages.transactionDetails.contractId')}} <button :class="transactionType.fill" v-clipboard:copy="transaction.tx.contract_id" @click="copy" class="copyBtn">COPY</button></div>
                 <input disabled :value="transaction.tx.contract_id" length="flat" class="transactionTo transactionDetailsInputs"/>
             </ae-list-item>
             <ae-list-item fill="neutral" class="flex-direction-column" v-if="isNameClaimTx">

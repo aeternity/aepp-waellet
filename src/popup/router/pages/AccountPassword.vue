@@ -94,7 +94,7 @@ export default {
             let address = await this.$store.dispatch('generateWallet', { seed: data })
             const keyPair = await addressGenerator.importPrivateKey(accountPassword, data, address);
             if(keyPair) {
-                this.setLogin(keyPair,wallet, false, termsAgreed, accountPassword);
+                this.setLogin(keyPair, false, termsAgreed, accountPassword);
             }
             
         },
@@ -105,7 +105,7 @@ export default {
             let address = await this.$store.dispatch('generateWallet', { seed })
             const keyPair = await addressGenerator.generateKeyPair(accountPassword,seed.toString('hex'),address);
             if(keyPair) {
-                this.setLogin(keyPair,wallet, false, termsAgreed, accountPassword);
+                this.setLogin(keyPair, false, termsAgreed, accountPassword);
             }
         },
         importKeystore:async function importKeystore({accountPassword,data,termsAgreed}) {
@@ -117,7 +117,7 @@ export default {
                 let address = await this.$store.dispatch('generateWallet', { seed })
                 // let wallet = generateHdWallet(match);
                 let keyPair = {encryptedPrivateKey:JSON.stringify(encryptedPrivateKey),publicKey:encryptedPrivateKey.public_key};
-                this.setLogin(keyPair,wallet,true,termsAgreed, accountPassword);
+                this.setLogin(keyPair,true,termsAgreed, accountPassword);
             }else {
                 this.loginError = true;
                 this.errorMsg = "";
@@ -126,7 +126,7 @@ export default {
                 
             }
         },
-        async setLogin(keyPair,wallet, fixAccount = false, termsAgreed, accountPassword) {
+        async setLogin(keyPair, fixAccount = false, termsAgreed, accountPassword) {
             if(fixAccount) {
                 // let address = getHdWalletAccount(wallet).address;
                 let address = await this.$store.dispatch('getAccount', { idx:0 })

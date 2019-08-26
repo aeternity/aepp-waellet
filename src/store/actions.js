@@ -9,6 +9,7 @@ import Ledger from '../popup/utils/ledger/ledger';
 import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet'
 import AES from '../popup/utils/aes';
 import { postMesssage } from '../popup/utils/connection';
+import { getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 
 export default {
   setAccount({ commit }, payload) {
@@ -374,6 +375,15 @@ export default {
     return new Promise(async (resolve, reject) => {
       let { res: { address } } = await postMesssage(background, { type: 'getAccount' , payload: { idx } } )
       resolve(address)
+    })
+  },
+
+  async getKeyPair({ state: { background, account } }, { idx }){
+    return new Promise(async (resolve, reject) => {
+      
+      let { res } = await postMesssage(background, { type: 'getKeypair' , payload: { activeAccount:idx, account: { publicKey: account.publicKey } } } )
+      res = parseFromStorage(res)
+      resolve({publicKey:res.publicKey, secretKey:res.secretKey})
     })
   },
 

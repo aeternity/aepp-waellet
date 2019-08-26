@@ -348,7 +348,7 @@ describe("Test cases for Allowances Page", () => {
         .should('contain','Get it')
         .click()
         .get('h3')
-        .should('contain','Transfer Allowance')
+        .should('contain','Transfer allowance')
         .should('be.visible')
         .get(':nth-child(5) > .ae-input-box > .ae-input')
         .should('be.disabled')
@@ -443,7 +443,7 @@ describe("Test cases for Allowances Page", () => {
         .get('.allowance-address')
         .should('be.disabled')
         .get('.allowanceExistError')
-        .should("contain",'Current allowed allowance is 999750 AET')
+        .should("contain",'Current allowed allowance amount is 999750 AET')
 
         .get('.allowance-value > .ae-input-box > .ae-input')
         .clear()

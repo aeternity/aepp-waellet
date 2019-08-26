@@ -48,7 +48,7 @@
           v-if="!account.encryptedPrivateKey"
           fill="primary"
           class="mb-1"
-          :class="[ terms[0] != 1 ? 'disabled' : '' ]"
+          :class="[ terms[0] != 1 && termsAgreedOrNot != true ? 'disabled' : '' ]"
           extend
           @click="generateAddress"
         >{{ $t('pages.index.generateWallet') }}</ae-button>

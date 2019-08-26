@@ -368,7 +368,7 @@ describe("Test cases for adding fungible tokens functionality", () => {
         .get('.spendTxDetailsList')
         .should('be.visible')
         .get('.ae-badge')
-        .should('contain','Contract Call')
+        .should('contain','Contract call')
         .get('.ae-badge')
         .should('contain','transfer')
         .get('.reject')
