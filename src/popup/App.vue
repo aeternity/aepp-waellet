@@ -210,7 +210,7 @@ export default {
       return 'v.' + browser.runtime.getManifest().version + 'beta'
     }
   },
-  created: function () {
+  created: async function () {
       browser.storage.sync.get('language').then((data) => {
         this.language = langs[data.language];
         this.$store.state.current.language = data.language;
