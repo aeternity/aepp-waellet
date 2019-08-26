@@ -224,8 +224,9 @@ export default {
         }
       });
       let background = await start(browser)
+      console.log(background)
       this.$store.commit( 'SET_BACKGROUND', background )
-      // console.log(this.$store.state.background)
+      
       //init SDK
       this.checkSDKReady = setInterval(() => {
         if(this.isLoggedIn && this.sdk == null) {

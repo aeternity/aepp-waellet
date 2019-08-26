@@ -50,7 +50,6 @@ const onBeforeLoad = (win,mock = '') => {
                 set(data,callback) {
                     
                     for (let d in data) {
-                        // localStorage[d] = JSON.stringify(data[d]);
                         localStorage[d] = stringifyForStorage(data[d]);
                     }
                     callback();
@@ -58,7 +57,6 @@ const onBeforeLoad = (win,mock = '') => {
                 get(data,callback) {
                     let res = {};
                     if(localStorage.getItem(data)){
-                        // res = {[data]: JSON.parse(localStorage.getItem(data))};
                         res = {[data]: parseFromStorage(localStorage.getItem(data))};
                     }
                     callback(res);

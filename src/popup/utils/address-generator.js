@@ -19,12 +19,11 @@ async function generateKeyPair (passphrase, privateKey, address) {
   const hexStr = await Crypto.hexStringToByte(privateKey.trim())
   const keys = await Crypto.generateKeyPairFromSecret(hexStr)
   const keystore = await dump('keystore', passphrase, keys.secretKey);
-  // let account = getHdWalletAccount(wallet);
   keystore.public_key = address;
   return {
     publicKey: keystore.public_key,
     encryptedPrivateKey: JSON.stringify(keystore)
-  };//secretKey: privateKey.trim(), 
+  };
 }
 
 async function importPrivateKey (passphrase, secretKey, address) {
@@ -32,10 +31,9 @@ async function importPrivateKey (passphrase, secretKey, address) {
   const keys = await Crypto.generateKeyPairFromSecret(hexStr)
 
   const keystore = await dump('keystore', passphrase, keys.secretKey);
-  // let account = getHdWalletAccount(wallet);
   keystore.public_key = address;
   return {
     publicKey: keystore.public_key,
     encryptedPrivateKey: JSON.stringify(keystore),
-  };//secretKey: secretKey.trim(), // NOT SECURE
+  };
 }

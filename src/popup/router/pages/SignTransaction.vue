@@ -451,7 +451,7 @@ export default {
                             this.port.postMessage(res)
                             let list = await removeTxFromStorage(this.data.id)
                             browser.storage.sync.set({pendingTransaction: { list } }).then(() => {})
-                            // this.removeTxStorageData()
+                            
                             setTimeout(() => {
                                 window.close()
                             },1000)
@@ -462,8 +462,6 @@ export default {
                                 let list = await removeTxFromStorage(this.data.id)
                                 browser.storage.sync.set({pendingTransaction: { list } }).then(() => {})
                                 this.redirectInExtensionAfterAction()
-                                // this.removeTxStorageData()
-                                // this.$router.push('/account');
                             })
                         }
                     }
@@ -559,7 +557,6 @@ export default {
         async contractDeploy() {
             let deployed
             if(this.isLedger) {
-                // let params = Object.assign({ foo: 'foo', bar: 'bar' }, this.txParams)
                 let { ownerId, amount, gas, code, callData, deposit } = this.txParams 
                 let tx = (await this.sdk[TX_TYPES[this.data.type]]({ownerId, amount, gas, code, callData, deposit})).tx
                 let sign = await this.$store.dispatch('ledgerSignTransaction', { tx })  
@@ -694,8 +691,7 @@ export default {
     },
     beforeRouteUpdate (to, from, next) {
         next()
-        // react to route changes...
-        // don't forget to call next()
+        
     }
 }
 </script>

@@ -114,7 +114,6 @@ export default {
         async addbtn() {
             if (this.newSubAcc != '') {
                 let idx = this.subaccounts.filter(s => !s.isLedger && !s.isAirGapAcc).length
-                // let public_K = getHdWalletAccount(this.wallet, idx).address;
                 let address = await this.$store.dispatch('getAccount', { idx })
                 this.$store.dispatch('setSubAccount', {
                     name: this.newSubAcc,

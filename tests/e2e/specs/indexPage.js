@@ -3,15 +3,15 @@ import {login} from '../login';
 import {prepareEncryptedPrivateKey, ACCOUNT_PASSWORD, PRIVATE_KEY, mnemonic} from '../utils.js';
 
 describe('Test cases for Index Page', () => {
-    // it('have import button', () => {
-    //     cy.visit('popup/popup.html',{onBeforeLoad});
-    //     cy.get('button').should('contain','Import secret key');
-    // });
+    it('have import button', () => {
+        cy.visit('popup/popup.html',{onBeforeLoad});
+        cy.get('button').should('contain','Import secret key');
+    });
 
-    // it('have generate wallet button', () => {
-    //     cy.visit('popup/popup.html',{onBeforeLoad});
-    //     cy.get('button').should('contain','Generate wallet');
-    // });
+    it('have generate wallet button', () => {
+        cy.visit('popup/popup.html',{onBeforeLoad});
+        cy.get('button').should('contain','Generate wallet');
+    });
 
 
     it("have login button and logout", () => {

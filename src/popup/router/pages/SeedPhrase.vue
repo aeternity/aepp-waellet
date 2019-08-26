@@ -159,7 +159,6 @@ export default {
                                 let seed = mnemonicToSeed(originalSeed);
                                 console.log(seed)
                                 let address = await this.$store.dispatch('generateWallet', { seed })
-                                // let wallet = generateHdWallet(privateKey);
                                 const keyPair = await addressGenerator.generateKeyPair(pass.accountPassword,seed.toString('hex'), address);
                                 if(keyPair) {
                                     browser.storage.sync.set({isLogged: true}).then(async () => {
@@ -176,15 +175,12 @@ export default {
                                                 browser.storage.sync.set({accountPassword: ''}).then(() => {});
                                                 browser.storage.sync.set({mnemonic: ''}).then(() => {});
                                                 browser.storage.sync.set({confirmSeed: true}).then(() => {});
-                                                // browser.storage.sync.set({wallet: wallet}).then(() => {});
                                                 browser.storage.sync.set({subaccounts: sub}).then(() => {
                                                     this.$store.dispatch('setSubAccounts', sub);
                                                     browser.storage.sync.set({activeAccount: 0}).then(async () => {
                                                         this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:keyPair.publicKey,index:0});
                                                         this.$store.commit('UPDATE_ACCOUNT', keyPair);
                                                         this.$store.commit('SWITCH_LOGGED_IN', true);
-                                                        // this.$store.commit('SET_WALLET', wallet);
-                                                        // await this.$store.dispatch('encryptHdWallet', pass.accountPassword)
                                                         this.$router.push('/account');
                                                         this.generated = true;
                                                     });

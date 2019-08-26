@@ -1,5 +1,5 @@
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { checkAeppConnected, initializeSDK, removeTxFromStorage } from './popup/utils/helper';
+import { checkAeppConnected, initializeSDK, removeTxFromStorage, detectBrowser } from './popup/utils/helper';
 import WalletContorller from './wallet-controller'
 
 
@@ -315,8 +315,13 @@ const postToContent = (data, tabId) => {
 const controller = new WalletContorller()
 
 browser.runtime.onConnect.addListener( ( port ) => {
-    if(port.name == 'popup' && port.sender.id == browser.runtime.id && port.sender.url == `chrome-extension://${browser.runtime.id}/popup/popup.html`) {
+    let extensionUrl = 'chrome-extension'
+    if(detectBrowser() == 'Firefox') {
+        extensionUrl = 'moz-extension'
+    }
+    if((port.name == 'popup' && port.sender.id == browser.runtime.id && port.sender.url == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && detectBrowser() != 'Firefox') || ( detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id ) ) {
         port.onMessage.addListener(({ type, payload, uuid}) => {
+            console.log(type)
             controller[type](payload).then((res) => {
                 port.postMessage({ uuid, res })
             })
