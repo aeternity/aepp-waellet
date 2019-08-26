@@ -321,8 +321,7 @@
             "name": "Name",
             "nameSalt": "Name Salt",
             "nameId": "Name Id",
-            "copy": "Copy",
-            
+            "copy": "Copy"
         },
         "transactions": {
             "backToAccount": "Back to account",
