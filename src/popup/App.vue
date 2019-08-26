@@ -224,7 +224,6 @@ export default {
         }
       });
       let background = await start(browser)
-      console.log(background)
       this.$store.commit( 'SET_BACKGROUND', background )
       
       //init SDK
