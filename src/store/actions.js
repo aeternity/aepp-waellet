@@ -296,31 +296,36 @@ export default {
   async updateRegisteredName({ commit, state }) {
     let pending = uniqBy(state.pendingNames, 'hash')
     return new Promise(async (resolve, reject) => {
-      if (pending.length) {
-        let { hash, name } = head(pending)
-        let register = await state.sdk.poll(hash)
-        let claim = await state.sdk.aensQuery(name)
-        let tx = {
-          popup: false,
-          tx: {
-            name,
-            recipientId: '',
-            claim,
-            hash
-          },
-          type: 'nameUpdate'
-        }
-        commit('SET_AEPP_POPUP', true)
-        resolve(register)
-        router.push({
-          'name': 'sign', params: {
-            data: tx,
-            type: tx.type
+      try {
+        if (pending.length) {
+          let { hash, name } = head(pending)
+          let register = await state.sdk.poll(hash)
+          let claim = await state.sdk.aensQuery(name)
+          let tx = {
+            popup: false,
+            tx: {
+              name,
+              recipientId: '',
+              claim,
+              hash
+            },
+            type: 'nameUpdate'
           }
-        })
-      } else {
+          commit('SET_AEPP_POPUP', true)
+          resolve(register)
+          router.push({
+            'name': 'sign', params: {
+              data: tx,
+              type: tx.type
+            }
+          })
+        } else {
+          resolve()
+        }
+      } catch(e) {
         resolve()
       }
+      
     })
   },
   removePendingName({ commit, state }, { hash }) {
@@ -386,7 +391,7 @@ export default {
   async getKeyPair({ state: { background, account } }, { idx }){
     return new Promise(async (resolve, reject) => {
       
-      let { res } = await postMesssage(background, { type: 'getKeypair' , payload: { activeAccount:idx, account: { publicKey: account.publicKey } } } )
+      let { res } = await postMesssage(background, { type: 'getAllUserTokens' , payload: { activeAccount:idx, account: { publicKey: account.publicKey } } } )
       res = parseFromStorage(res)
       resolve({publicKey:res.publicKey, secretKey:res.secretKey})
     })
@@ -441,25 +446,30 @@ export default {
 
   async getAllUserTokens({ state: { tokenRegistry, account, tokens, sdk }, dispatch }) {
     let { publicKey } = account
+    let res = []
+    try {
+      let tkns = (await contractCall({ instance:tokenRegistry, method:'get_all_tokens' })).decodedResult
+      res = (await Promise.all(tkns.map(async ( tkn ) => { 
+        let balance = (await contractCall({ instance:tokenRegistry, method:'get_token_balance', params: [tkn[0], publicKey] })).decodedResult
+        let owner = (await contractCall({ instance:tokenRegistry, method:'get_token_owner', params: [tkn[0]] })).decodedResult
+        let token
+        if(typeof balance != 'undefined' || owner == publicKey) {
+          token = {
+            balance,
+            parent: publicKey,
+            contract: tkn[0],
+            name: tkn[1].name,
+            symbol:tkn[1].symbol,
+            precision:tkn[1].decimals
+          }
+        } 
+        return token
+        // console.log(tokens)
+      }))).filter(t => typeof t != 'undefined')
+    } catch(e) {
+
+    }
     
-    let tkns = (await contractCall({ instance:tokenRegistry, method:'get_all_tokens' })).decodedResult
-    let res = (await Promise.all(tkns.map(async ( tkn ) => { 
-      let balance = (await contractCall({ instance:tokenRegistry, method:'get_token_balance', params: [tkn[0], publicKey] })).decodedResult
-      let owner = (await contractCall({ instance:tokenRegistry, method:'get_token_owner', params: [tkn[0]] })).decodedResult
-      let token
-      if(typeof balance != 'undefined' || owner == publicKey) {
-        token = {
-          balance,
-          parent: publicKey,
-          contract: tkn[0],
-          name: tkn[1].name,
-          symbol:tkn[1].symbol,
-          precision:tkn[1].decimals
-        }
-      } 
-      return token
-      // console.log(tokens)
-    }))).filter(t => typeof t != 'undefined')
     let savedTokens = await browser.storage.sync.get('tokens')
     res = tokens.concat(res)
     let userTokens = res

@@ -1,7 +1,22 @@
-import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { checkAeppConnected, initializeSDK, removeTxFromStorage, detectBrowser } from './popup/utils/helper';
+import { 
+    phishingCheckUrl, 
+    getPhishingUrls, 
+    setPhishingUrl 
+} from './popup/utils/phishing-detect';
+import { 
+    checkAeppConnected,
+    removeTxFromStorage, 
+    detectBrowser 
+} from './popup/utils/helper';
 import WalletContorller from './wallet-controller'
 import Notification from './notifications';
+import { 
+    HDWALLET_METHODS
+} from './popup/utils/constants'
+
+
+
+import initRpcwallet from './lib/initRpcWallet'
 
 
 global.browser = require('webextension-polyfill');
@@ -17,9 +32,8 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
         if(wins.length == 0) {
-            console.log("remove")
             sessionStorage.removeItem("phishing_urls");
-            browser.storage.sync.remove('isLogged')
+            // browser.storage.sync.remove('isLogged')
             browser.storage.sync.remove('activeAccount')
         }
     });
@@ -251,22 +265,39 @@ const postToContent = (data, tabId) => {
 }
 
 const controller = new WalletContorller()
-
-browser.runtime.onConnect.addListener( ( port ) => {
-    let extensionUrl = 'chrome-extension'
-    if(detectBrowser() == 'Firefox') {
-        extensionUrl = 'moz-extension'
-    }
-    if((port.name == 'popup' && port.sender.id == browser.runtime.id && port.sender.url == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && detectBrowser() != 'Firefox') || ( detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id ) ) {
-        port.onMessage.addListener(({ type, payload, uuid}) => {
-            console.log(type)
-            controller[type](payload).then((res) => {
-                port.postMessage({ uuid, res })
-            })
-        })  
-    }
-})  
-
-
-
 const notification = new Notification();
+
+
+const connectToExtPopup = (onMessage) => {
+    browser.runtime.onConnect.addListener( ( port ) => {
+        let extensionUrl = 'chrome-extension'
+        if(detectBrowser() == 'Firefox') {
+            extensionUrl = 'moz-extension'
+        }
+        if((port.name == 'popup' && port.sender.id == browser.runtime.id && port.sender.url == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && detectBrowser() != 'Firefox') || ( detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id ) ) {
+            port.onMessage.addListener(({ type, payload, uuid}) => {
+                let hdwallet = false
+                if(HDWALLET_METHODS.includes(type)) {
+                    hdwallet = true
+                    
+                } 
+                onMessage({ hdwallet, port, type, payload, uuid })
+            })  
+        }
+    }) 
+}
+
+connectToExtPopup(({ hdwallet, port, type, payload, uuid }) => {
+    if(hdwallet) {
+        controller[type](payload).then((res) => {
+            port.postMessage({ uuid, res })
+        })
+    }
+})
+
+
+/** 
+ * AEX-2
+ */
+
+initRpcwallet(connectToExtPopup, controller)

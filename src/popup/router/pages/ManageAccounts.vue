@@ -130,6 +130,7 @@ export default {
                             browser.storage.sync.set({activeAccount: index }).then(() => {
                                 this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:address,index:index});
                             });
+                            postMesssage(this.background, { type: 'addAccount' , payload: { idx, address } } )
                             this.setAccounts();
                         });
                     });

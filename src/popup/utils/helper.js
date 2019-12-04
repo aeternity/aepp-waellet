@@ -38,7 +38,7 @@ const extractHostName = (url) => {
     }
 
     //find & remove port number
-    hostname = hostname.split(':')[0];
+    // hostname = hostname.split(':')[0];`
     //find & remove "?"
     hostname = hostname.split('?')[0];
 
@@ -115,32 +115,39 @@ const checkAeppConnected = (host) => {
 const redirectAfterLogin = (ctx) => {
   browser.storage.sync.get('showAeppPopup').then((aepp) => {
     browser.storage.sync.get('pendingTransaction').then((pendingTx) => {
-        if(aepp.hasOwnProperty('showAeppPopup') && aepp.showAeppPopup.hasOwnProperty('type') && aepp.showAeppPopup.hasOwnProperty('data') && aepp.showAeppPopup.type != "" ) {
+        if(process.env.RUNNING_IN_POPUP ) {
             browser.storage.sync.remove('showAeppPopup').then(() => {
                 ctx.$store.commit('SET_AEPP_POPUP',true)
-                
-                if(aepp.showAeppPopup.type == 'connectConfirm') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'connect-confirm', params: {
-                    data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'txSign') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign', params: {
-                    data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'contractCall') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign', params: {
-                        data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'signMessage') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign-verify-message', params: {
-                        data:aepp.showAeppPopup.data
-                    }})
+                if(window.hasOwnProperty("name") && window.name.includes("popup")) {
+                    console.log(window.props.type)
+                    if(window.props.type == "connectConfirm") {
+                        ctx.$router.push('/connect-confirm');
+                    } else if(window.props.type == "sign") {
+                        ctx.$router.push('/popup-sign-tx');
+                    }
                 }
-            return;
+                // if(aepp.showAeppPopup.type == 'connectConfirm') {
+                //     aepp.showAeppPopup.data.popup = true
+                //     ctx.$router.push({'name':'connect-confirm', params: {
+                //     data:aepp.showAeppPopup.data
+                //     }});
+                // }else if(aepp.showAeppPopup.type == 'txSign') {
+                //     aepp.showAeppPopup.data.popup = true
+                //     ctx.$router.push({'name':'sign', params: {
+                //     data:aepp.showAeppPopup.data
+                //     }});
+                // }else if(aepp.showAeppPopup.type == 'contractCall') {
+                //     aepp.showAeppPopup.data.popup = true
+                //     ctx.$router.push({'name':'sign', params: {
+                //         data:aepp.showAeppPopup.data
+                //     }});
+                // }else if(aepp.showAeppPopup.type == 'signMessage') {
+                //     aepp.showAeppPopup.data.popup = true
+                //     ctx.$router.push({'name':'sign-verify-message', params: {
+                //         data:aepp.showAeppPopup.data
+                //     }})
+                // }
+                return;
             });
         }else if(pendingTx.hasOwnProperty('pendingTransaction') && pendingTx.pendingTransaction.hasOwnProperty('list') && Object.keys(pendingTx.pendingTransaction.list).length > 0) {
             ctx.$store.commit('SET_AEPP_POPUP',true)
@@ -355,6 +362,64 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
     return async ? (decode ? call.decodedResult : call ) : params.length ? instance.methods[method](...params) :  instance.methods[method]()
 }
 
+const getAeppAccountPermission = (host, account) => {
+    return new Promise((resolve, reject) => {
+        browser.storage.sync.get('connectedAepps').then((aepps) => {
+            if(!aepps.hasOwnProperty('connectedAepps')) {
+                return resolve(false)
+            }
+            if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
+                let list = aepps.connectedAepps.list
+                if(list.find(ae => ae.host == host && ae.accounts.includes(account))) {
+                    return resolve(true)
+                }
+                return resolve(false)
+            }
+
+            return resolve(false)
+        })
+    })
+}
+
+const setPermissionForAccount = (host, account) => {
+    return new Promise((resolve, reject) => {
+        browser.storage.sync.get('connectedAepps').then((aepps) => {
+
+            let list = []
+            if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
+                list = aepps.connectedAepps.list
+            }
+            
+            if (list.length && typeof list.find(l => l.host == host) != "undefined") {
+                let hst = list.find(h => h.host == host)
+                let index = list.findIndex(h => h.host == host)
+                if(typeof hst == "undefined") {
+                    console.log("here 1")
+                    resolve()
+                    return 
+                }
+                if(hst.accounts.includes(account)) {
+                    console.log("here 2")
+                    resolve()
+                    return
+                }
+
+                list[index].accounts = [...hst.accounts, account]
+
+            } else {
+                list.push({ host, accounts: [account] })
+            }   
+            console.log("here 3")
+            // return;
+            browser.storage.sync.set({connectedAepps: { list }}).then(() => {
+                console.log("save")
+                console.log("here 4")
+                resolve()
+            })
+        })
+    })
+}
+
 export { 
     shuffleArray, 
     convertToAE, 
@@ -377,7 +442,9 @@ export {
     parseFromStorage,
     escapeCallParams,
     addRejectedToken,
-    contractCall
+    contractCall,
+    getAeppAccountPermission,
+    setPermissionForAccount
 }
 
 

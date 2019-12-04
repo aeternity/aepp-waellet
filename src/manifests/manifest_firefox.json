@@ -1,54 +1,70 @@
 {
-    "name": "waellet",
-    "description": "waellet - aeternity browser extension",
-    "version": null,
-    "manifest_version": 2,
-    "applications": {
-      "gecko": {
-        "id": "radkov@hack.bg",
-        "strict_min_version": "53.0"
-      }
-    },
-    "permissions": [
-      "storage",
-      "unlimitedStorage",
-      "videoCapture",
-      "activeTab",
-      "notifications"
-    ],
-    "icons": {
-      "48": "icons/icon_48.png",
-      "128": "icons/icon_128.png"
-    },
-    "browser_action": {
-      "default_title": "waellet",
-      "default_popup": "popup/popup.html"
-    },
-    "background": {
-      "scripts": [
-        "background.js"
-      ],
-      "persistent": true
-    },
-    "content_scripts": [{
+  "name": "Waellet",
+  "description": "waellet - aeternity browser extension",
+  "version": "0.2.3",
+  "manifest_version": 2,
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "applications": {
+    "gecko": {
+      "id": "radkov@hack.bg",
+      "strict_min_version": "53.0"
+    }
+  },
+  "browser_action": {
+    "default_title": "waellet",
+    "default_popup": "popup/popup.html"
+  },
+  "icons": {
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "videoCapture",
+    "activeTab",
+    "clipboardWrite",
+    "notifications",
+    "contentSettings",
+    "https://*/*"
+  ],
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": [
+      "http://localhost/*",
+      "https://*.aepps.tech/*",
+      "http://*.itbp.tech/*"
+    ]
+  },
+  "content_scripts": [
+    {
       "run_at": "document_start",
       "all_frames":true,
       "matches": [
         "https://*/*",
         "http://*/*"
       ],
-      "js": ["inject.js"]
-    }],
-    "web_accessible_resources": [
-      "inject.js",
-      "phishing/phishing.html",
-      "phishing/phishing.js",
-      "aepp.js",
-      "popup/CameraRequestPermission.html"
-    ],
-    "options_ui": {
-      "page": "options/options.html",
-      "chrome_style": true
+      "js": [
+        "inject.js"
+      ]
     }
+  ],
+  "web_accessible_resources": [
+    "inject.js",
+    "phishing/phishing.html",
+    "phishing/phishing.js",
+    "aepp.js",
+    "popup/CameraRequestPermission.html"
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "chrome_style": true
   }
-  
+
+}

@@ -1,39 +1,54 @@
 {
-  "name": "waellet",
+  "name": "Waellet",
   "description": "waellet - aeternity browser extension",
-  "version": null,
+  "version": "0.2.3",
   "manifest_version": 2,
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "browser_action": {
+    "default_title": "waellet",
+    "default_popup": "popup/popup.html"
+  },
+  "icons": {
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "storage",
     "unlimitedStorage",
     "videoCapture",
     "activeTab",
     "clipboardWrite",
-    "notifications"
+    "notifications",
+    "contentSettings",
+    "https://*/*"
   ],
-  "icons": {
-    "48": "icons/icon_48.png",
-    "128": "icons/icon_128.png"
-  },
-  "browser_action": {
-    "default_title": "waellet",
-    "default_popup": "popup/popup.html"
-  },
-  "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": true
-  },
-  "content_scripts": [{
-    "run_at": "document_start",
-    "all_frames":true,
+  "externally_connectable": {
+    "ids": ["*"],
     "matches": [
-      "https://*/*",
-      "http://*/*"
-    ],
-    "js": ["inject.js"]
-  }],
+      "http://localhost/*",
+      "https://*.aepps.tech/*",
+      "http://*.itbp.tech/*"
+    ]
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "all_frames":true,
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "inject.js"
+      ]
+    }
+  ],
   "web_accessible_resources": [
     "inject.js",
     "phishing/phishing.html",
@@ -45,4 +60,5 @@
     "page": "options/options.html",
     "chrome_style": true
   }
+
 }

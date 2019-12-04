@@ -61,6 +61,7 @@ export default class WalletController {
                     secretKey: getHdWalletAccount(this.wallet,activeAccount).secretKey
                 }))
             }catch(e) {
+                console.log(e)
                 resolve({ error: true })
             }
         })
@@ -72,5 +73,9 @@ export default class WalletController {
                 address: getHdWalletAccount(this.wallet, idx).address
             })
         })
+    }
+
+    isLoggedIn() {
+        return typeof this.wallet != "undefined" && this.wallet != null
     }
 }

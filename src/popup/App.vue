@@ -167,7 +167,7 @@
     <div class="connect-error" v-if="connectError" >Unable to connect to choosen node</div>
   </ae-main>
 </template>
-
+ 
 <script>
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
@@ -181,6 +181,7 @@ import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from './utils/c
 import LedgerBridge from './utils/ledger/ledger-bridge'
 import { start, postMesssage } from './utils/connection'
 import { langs,fetchAndSetLocale } from './utils/i18nHelper'
+import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
 
 export default {
   
@@ -226,26 +227,31 @@ export default {
       });
       let background = await start(browser)
       this.$store.commit( 'SET_BACKGROUND', background )
-      
-      //init SDK
-      this.checkSDKReady = setInterval(() => {
-        if(this.isLoggedIn && this.sdk == null) {
-          
-          this.initLedger()
-          this.initSDK()
-          
-          this.pollData()
-          clearInterval(this.checkSDKReady)
-        }
-      },500)
 
-      setTimeout(() => {
-        if(this.isLoggedIn) {
-          this.pollData()
-        }else {
-          this.hideLoader()
-        }
-      },500)
+      
+      if(!process.env.RUNNING_IN_POPUP) {
+        //init SDK
+        this.checkSDKReady = setInterval(() => {
+          if(this.isLoggedIn && this.sdk == null) {
+            
+            this.initLedger()
+            this.initSDK()
+            
+            this.pollData()
+            clearInterval(this.checkSDKReady)
+          }
+        },500)
+
+        setTimeout(() => {
+          if(this.isLoggedIn) {
+            this.pollData()
+          }else {
+            this.hideLoader()
+          }
+        },500)
+      } else {
+        this.hideLoader()
+      }
 
       this.checkPendingTx()
       window.addEventListener('resize', () => {
@@ -272,6 +278,7 @@ export default {
     changeAccount (index,subaccount) {
       this.$store.commit('SET_ACTIVE_TOKEN',0)
       browser.storage.sync.set({activeAccount: index}).then(() => {
+        postMesssage(this.background, { type: 'changeAccount' , payload: subaccount.publicKey } )
         this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:subaccount.publicKey,index:index});
         this.initSDK();
         this.dropdown.account = false;
@@ -313,6 +320,7 @@ export default {
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
+        postMesssage(this.background, { type: 'switchNetwork' , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
         let transactions = this.$store.dispatch('getTransactionsByPublicKey',{publicKey:this.account.publicKey,limit:3});
@@ -438,8 +446,11 @@ export default {
       
       if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
         await this.$store.commit('SET_TOKEN_REGISTRY', await sdk.getContractInstance(this.network[this.current.network].networkId == "ae_uat" ? TOKEN_REGISTRY_CONTRACT_LIMA : TOKEN_REGISTRY_CONTRACT, { contractAddress: this.network[this.current.network].tokenRegistry }) )
-        
-        this.$store.dispatch('getAllUserTokens')
+        try {
+          this.$store.dispatch('getAllUserTokens')
+        } catch(e) {
+          console.log(e)
+        }
       }
       
       if(typeof sdk.error != 'undefined') {
